@@ -15,7 +15,8 @@ app.use(express.urlencoded({ extended: true }));
 
 const urlPlaying = [
     {
-        url: ""
+        url: "",
+        name: ""
     }
 ]
 
@@ -106,10 +107,11 @@ app.get('/radio/top', async (request, response) => {
 app.post('/radio/play', async (request, response) => {
     try {
         urlPlaying[0].url = request.body.url;
+        urlPlaying[0].name = request.body.name;
         response.send(urlPlaying);
     } catch (error) {
         console.error(error);
-        response.status(500).send('An error occurred while fetching playing radio station.');
+        response.status(500).send('An error occurred while posting playing radio station.');
     }
 });
 
