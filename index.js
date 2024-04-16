@@ -11,6 +11,13 @@ app.use(
     extended: true,
   })
 );
+app.use(express.urlencoded({ extended: true }));
+
+const urlPlaying = [
+    {
+        url: ""
+    }
+]
 
 // GET method route
 app.get('/', (request, response) => {
@@ -98,7 +105,7 @@ app.get('/radio/top', async (request, response) => {
 // Post radio station URL
 app.post('/radio/play', async (request, response) => {
     try {
-        urlPlaying[0].url = request.query.url;
+        urlPlaying[0].url = request.body.url;
         response.send(urlPlaying);
     } catch (error) {
         console.error(error);
@@ -115,9 +122,3 @@ app.get('/radio/play', async (request, response) => {
         response.status(500).send('An error occurred while fetching playing radio station.');
     }
 });
-
-const urlPlaying = [
-    {
-        url: ""
-    }
-]
