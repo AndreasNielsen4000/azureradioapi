@@ -98,7 +98,7 @@ app.get('/radio/top', async (request, response) => {
 // Post radio station URL
 app.post('/radio/play', async (request, response) => {
     try {
-        urlPlaying[0].url = request.body.url;
+        urlPlaying[0].url = request.query.url;
         response.send(urlPlaying);
     } catch (error) {
         console.error(error);
