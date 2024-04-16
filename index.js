@@ -103,6 +103,25 @@ app.get('/radio/top', async (request, response) => {
     }
 });
 
+// Get top 5 radio stations by click count in Denmark
+app.get('/radio/top/dk', async (request, response) => {
+    try {
+        let filter = {
+            order: 'clickcount', // stations by topvote
+            country: 'Denmark', // stations in Denmark
+            reverse: true,  // reverse order
+            limit: 5    // top 5 stations
+        }
+        console.log('Filter:', filter);
+        const stations = await RadioBrowser.searchStations(filter);
+        console.log('Stations:', stations);
+        response.send(stations);
+    } catch (error) {
+        console.error('Error fetching top radio stations:', error);
+        response.status(500).send('An error occurred while fetching top radio stations.');
+    }
+});
+
 // Post radio station URL
 app.post('/radio/play', async (request, response) => {
     try {
