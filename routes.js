@@ -1,59 +1,13 @@
-const bodyParser = require('body-parser');
-const express = require('express')
+const express = require('express');
+const router = express.Router();
 const RadioBrowser = require('radio-browser');
-const app = express();
-const port = process.env.PORT || 3000;
-
-// Use Node.js body parsing middleware 
-app.use(bodyParser.json());
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-);
-app.use(express.urlencoded({ extended: true }));
 
 const urlPlaying = [
     {
         url: "",
         name: ""
     }
-]
-
-// GET method route
-app.get('/', (request, response) => {
-    response.send(`
-        <!DOCTYPE html>
-        <html>
-            <head>
-                <title>My Simple Website</title>
-            </head>
-            <body>
-                <h1>Node.js and Express REST API</h1>
-                <p>Welcome to my simple website built with Node.js and Express!</p>
-                <h2>Available APIs:</h2>
-                <ul>
-                    <li><a href="/users">/users</a></li>
-                    <li><a href="/radio?searchterm=rock">/radio?searchterm=rock</a></li>
-                    <li><a href="/radio/top">/radio/top</a></li>
-                    <!-- Add more API endpoints here -->
-                </ul>
-            </body>
-        </html>
-    `);
-});
-
-//Get users
-app.get('/users', (request, response) => {
-    response.send(users);
-});
-
-// Start the server 
-const server = app.listen(port, (error) => {
-  if (error) return console.log(`Error: ${error}`);
-  console.log(`Server listening on port ${server.address().port}`);
-});
-
+];
 
 const users = [
     {
@@ -68,8 +22,35 @@ const users = [
     },
 ];
 
+
+//Get users
+router.get('/users', (request, response) => {
+    response.send(users);
+});
+
+// GET method route
+router.get('/', (request, response) => {
+    response.render("index");
+});
+
+// About page route
+router.get('/about', (request, response) => {
+    response.render("about");
+});
+
+// API page route
+router.get('/api', (request, response) => {
+    response.render("api");
+});
+
+// Home page route
+router.get('/home', (request, response) => {
+    response.render("home");
+});
+
+
 // Get radio stations by name
-app.get('/radio', async (request, response) => {
+router.get('/radio', async (request, response) => {
     try {
         let filter = {
             by: 'name', // stations by tag,
@@ -87,7 +68,7 @@ app.get('/radio', async (request, response) => {
 });
 
 // Get top 5 radio stations by click count
-app.get('/radio/top', async (request, response) => {
+router.get('/radio/top', async (request, response) => {
     try {
         let filter = {
             by: 'topclick', // stations by topvote
@@ -104,7 +85,7 @@ app.get('/radio/top', async (request, response) => {
 });
 
 // Get top 5 radio stations by click count in Denmark
-app.get('/radio/top/dk', async (request, response) => {
+router.get('/radio/top/dk', async (request, response) => {
     try {
         let filter = {
             order: 'clickcount', // stations by topvote
@@ -123,7 +104,7 @@ app.get('/radio/top/dk', async (request, response) => {
 });
 
 // Post radio station URL
-app.post('/radio/play', async (request, response) => {
+router.post('/radio/play', async (request, response) => {
     try {
         urlPlaying[0].url = request.body.url;
         urlPlaying[0].name = request.body.name;
@@ -135,7 +116,7 @@ app.post('/radio/play', async (request, response) => {
 });
 
 // Get radio station URL
-app.get('/radio/play', async (request, response) => {
+router.get('/radio/play', async (request, response) => {
     try {
         response.send(urlPlaying);
     } catch (error) {
@@ -143,3 +124,5 @@ app.get('/radio/play', async (request, response) => {
         response.status(500).send('An error occurred while fetching playing radio station.');
     }
 });
+
+module.exports = router;

@@ -1,0 +1,36 @@
+<%- include('_header'); -%>
+
+<html>
+<head>
+    <title>Home - Group 7 DTU</title>
+</head>
+<body>
+    <h1>Welcome to the Radio Player Home</h1>
+    <p>This is a simple radio player that can play audio from a URL.</p>
+
+    <h2>Currently Playing:</h2>
+    <h3 id="currentSong">Loading...</h3>
+
+    <h2>Enter a URL to play:</h2>
+    <form action="/radio/play" method="post">
+        <input type="text" name="url" placeholder="Enter URL" required>
+        <input type="text" name="name" placeholder="Enter Name" required>
+        <button type="submit">Play</button>
+    </form>
+</body>
+</html>
+
+<script>
+    // Fetch the currently playing song
+    fetch('/radio/play')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('currentSong').textContent = data[0].name;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('currentSong').textContent = 'Error fetching current song.';
+        });
+</script>
+
+<%- include ('_footer'); -%>
