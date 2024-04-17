@@ -9,23 +9,73 @@
     <p>This is a simple radio player that can play audio from a URL.</p>
 
     <h2>Currently Playing:</h2>
-    <h3 id="currentSong">Loading...</h3>
+    <h3 id="currentSong"></h3>
 
-    <h2>Enter a URL to play:</h2>
-    <form action="/radio/play" method="post">
-        <input type="text" name="url" placeholder="Enter URL" required>
-        <input type="text" name="name" placeholder="Enter Name" required>
-        <button type="submit">Play</button>
-    </form>
+    <h2>Enter a URL and a Name to play:</h2>
+<form id="playForm">
+    <input type="text" name="url" id="url" placeholder="Enter URL" required>
+    <input type="text" name="name" id="name" placeholder="Enter Name" required>
+    <button type="submit">Play</button>
+</form>
+<p id="message"></p>
 </body>
 </html>
+
+<script>
+    document.getElementById('playForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the form from being submitted normally
+
+    const url = document.getElementById('url').value;
+    const name = document.getElementById('name').value;
+
+    // Send a POST request to /radio/play
+    fetch('/radio/play', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`,
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('message').textContent = 'URL and name have been submitted.';
+
+        // Fetch the currently playing song
+        fetch('/radio/play')
+            .then(response => response.json())
+            .then(data => {
+                const currentSongElement = document.getElementById('currentSong');
+                if (data[0].url) {
+                    currentSongElement.textContent = data[0].name;
+                    currentSongElement.previousElementSibling.style.display = 'block'; // Show "Currently Playing:"
+                } else {
+                    currentSongElement.previousElementSibling.style.display = 'none'; // Hide "Currently Playing:"
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('currentSong').textContent = 'Error fetching current song.';
+            });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('message').textContent = 'An error occurred while submitting the URL and name.';
+    });
+});
+</script>
 
 <script>
     // Fetch the currently playing song
     fetch('/radio/play')
         .then(response => response.json())
         .then(data => {
-            document.getElementById('currentSong').textContent = data[0].name;
+            const currentSongElement = document.getElementById('currentSong');
+            if (data[0].url) {
+                currentSongElement.textContent = data[0].name;
+                currentSongElement.previousElementSibling.style.display = 'block'; // Show "Currently Playing:"
+            } else {
+                currentSongElement.previousElementSibling.style.display = 'none'; // Hide "Currently Playing:"
+            }
         })
         .catch(error => {
             console.error('Error:', error);
