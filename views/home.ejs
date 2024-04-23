@@ -11,67 +11,102 @@
     <h2>Currently Playing:</h2>
     <h3 id="currentSong"></h3>
 
-    <h2>Enter a URL and a Name to play:</h2>
-<form id="playForm">
-    <input type="text" name="url" id="url" placeholder="Enter URL" required>
-    <input type="text" name="name" id="name" placeholder="Enter Name" required>
-    <button type="submit">Play</button>
-</form>
-<p id="message"></p>
+    <h2>Enter a URL to play:</h2>
+    <form id="playForm">
+        <input type="text" name="url" id="url" placeholder="Enter URL" required> 
+        <button type="submit">Play</button> 
+        <br>
+        <br>
+        <br>
+        <label for="volume">Volume:</label>
+        <input type="range" id="volume" name="volume" min="0" max="100" value="50">
+        <br>
+        <button type="button" id="playPauseButton">Play/Pause</button>
+    </form>
+    <p id="message"></p>
 </body>
 </html>
 
 <script>
-    document.getElementById('playForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Prevent the form from being submitted normally
+    // When the page loads, restore the state from localStorage
+    let isPlaying = localStorage.getItem('isPlaying') === 'true';
+    
+    window.addEventListener('load', function() {
+        const url = localStorage.getItem('url');
+        const volume = localStorage.getItem('volume');
+        const name = localStorage.getItem('name');
 
-    const url = document.getElementById('url').value;
-    const name = document.getElementById('name').value;
-
-    // Send a POST request to /radio/play
-    fetch('/radio/play', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `url=${encodeURIComponent(url)}&name=${encodeURIComponent(name)}`,
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('message').textContent = 'URL and name have been submitted.';
-
-        // Fetch the currently playing song
-        fetch('/radio/play')
-            .then(response => response.json())
-            .then(data => {
-                const currentSongElement = document.getElementById('currentSong');
-                if (data[0].url) {
-                    currentSongElement.textContent = data[0].name;
-                    currentSongElement.previousElementSibling.style.display = 'block'; // Show "Currently Playing:"
-                } else {
-                    currentSongElement.previousElementSibling.style.display = 'none'; // Hide "Currently Playing:"
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                document.getElementById('currentSong').textContent = 'Error fetching current song.';
-            });
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('message').textContent = 'An error occurred while submitting the URL and name.';
+        if (url) {
+            document.getElementById('url').value = url;
+        }
+        if (isPlaying) {
+            document.getElementById('playPauseButton').textContent = 'Pause';
+        } else {
+        document.getElementById('playPauseButton').textContent = 'Play';
+        }
+        if (volume) {
+            document.getElementById('volume').value = volume;
+        }
+        if (name) {
+            document.getElementById('name').value = name;
+        }
     });
-});
-</script>
+    document.getElementById('playForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the form from being submitted normally
 
-<script>
-    // Fetch the currently playing song
+        const url = document.getElementById('url').value;
+        localStorage.setItem('url', url);
+        // Set isPlaying to true
+        isPlaying = true;
+        localStorage.setItem('isPlaying', isPlaying);
+        document.getElementById('playPauseButton').textContent = 'Pause';
+
+        // Send a POST request to /radio/play
+        fetch('/radio/play', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `url=${encodeURIComponent(url)}&isPlaying=${encodeURIComponent(isPlaying)}`,
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('message').textContent = 'URL has been submitted.';
+
+
+            // Fetch the currently playing song
+            fetch('/radio/play')
+                .then(response => response.json())
+                .then(data => {
+                    const currentSongElement = document.getElementById('currentSong');
+                    if (data[0].url) {
+                        currentSongElement.textContent = data[0].name;
+                        localStorage.setItem('name', data[0].name);
+                        currentSongElement.previousElementSibling.style.display = 'block'; // Show "Currently Playing:"
+                    } else {
+                        currentSongElement.previousElementSibling.style.display = 'none'; // Hide "Currently Playing:"
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('currentSong').textContent = 'Error fetching current song.';
+                });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('message').textContent = 'An error occurred while submitting the URL.';
+        });
+    });
+
+
+    // Fetch the currently playing Radio
     fetch('/radio/play')
         .then(response => response.json())
         .then(data => {
             const currentSongElement = document.getElementById('currentSong');
             if (data[0].url) {
                 currentSongElement.textContent = data[0].name;
+                localStorage.setItem('name', data[0].name);
                 currentSongElement.previousElementSibling.style.display = 'block'; // Show "Currently Playing:"
             } else {
                 currentSongElement.previousElementSibling.style.display = 'none'; // Hide "Currently Playing:"
@@ -81,6 +116,50 @@
             console.error('Error:', error);
             document.getElementById('currentSong').textContent = 'Error fetching current song.';
         });
+
+    // Adjust the volume
+    document.getElementById('volume').addEventListener('change', function() {
+        const volume = this.value;
+        localStorage.setItem('volume', volume);
+        console.log(volume);
+        // Send a POST request to /radio/volume
+        fetch('/radio/play', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `volume=${encodeURIComponent(volume)}`,
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('message').textContent = 'An error occurred while changing the volume.';
+        });
+    });
+
+    // Play/Pause button
+    document.getElementById('playPauseButton').addEventListener('click', function() {
+        // Toggle play state
+        isPlaying = !isPlaying;
+        localStorage.setItem('isPlaying', isPlaying);
+
+        // Send a POST request to /radio/play
+        fetch('/radio/play', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `isPlaying=${encodeURIComponent(isPlaying)}`,
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Update the button text based on the new play/pause state
+            document.getElementById('playPauseButton').textContent = isPlaying ? 'Pause' : 'Play';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('message').textContent = 'An error occurred while toggling play/pause.';
+        });
+    });
 </script>
 
 <%- include ('_footer'); -%>
