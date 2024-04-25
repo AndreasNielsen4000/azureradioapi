@@ -11,6 +11,12 @@ const urlPlaying = [
     }
 ];
 
+const batteryLevel = [
+    {
+        level: "100"
+    }
+];
+
 const users = [
     {
       id: 1,
@@ -50,6 +56,29 @@ router.get('/home', (request, response) => {
     response.render("home");
 });
 
+// Get battery level from the device - /radio/battery
+router.get('/radio/battery', async (request, response) => {
+    try {
+        response.send(batteryLevel);
+        console.log('Battery level:', batteryLevel);
+    } catch (error) {
+        console.error(error);
+        response.status(500).send('An error occurred while fetching battery level.');
+    }
+});
+
+// Post battery level to the device - /radio/battery
+router.post('/radio/battery', async (request, response) => {
+    try {
+        if (request.body.level !== undefined) {
+            batteryLevel[0].level = request.body.level;
+        }
+        response.send(batteryLevel);
+    } catch (error) {
+        console.error(error);
+        response.status(500).send('An error occurred while posting battery level.');
+    }
+});
 
 // Get radio stations by name
 router.get('/radio', async (request, response) => {

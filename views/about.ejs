@@ -23,7 +23,40 @@
         be 3D-Printed, and all electronics will be contained on two custom circuit boards. A backend server will be
         used to control and monitor the speaker system.
     </p>
-    <!-- Add the rest of the information in a similar way -->
+    <h3>Minimum implementation:</h3>
+    <ul>
+        <li>USB-C fast charging, with USB Power Delivery.</li>
+        <li>Battery management system including cell balancing, over/under voltage, over current, and over/under temperature protection.</li>
+        <li>Volume control with rotary encoder.</li>
+        <li>Battery SoC (State of Charge) indicator RGB LED PWM.</li>
+        <li>Audio streaming from smartphone.</li>
+        <li>Backend server to control and monitor the speakers. Settings to be controlled could include equalizer settings, radio station, or Spotify login. Speaker battery SoC can be logged in the backend.</li>
+        <li>Custom PCB’s with all the necessary electronics and batteries.</li>
+    </ul>
+    <h3>Extra features to be implemented:</h3>
+    <ul>
+        <li>3D-Printed speaker cabinet with bass-reflex port.</li>
+        <li>Digital signal processing, e.g. equalizer, loudness curves, bass enhancement algorithm etc.</li>
+        <li>Audio streaming from internet radio station.</li>
+        <li>Audio streaming from Spotify.</li>
+        <li>Stereo playback from two speakers.</li>
+        <li>Touch button for play/pause.</li>
+        <li>LCD</li>
+    </ul>
+    <h3>Here is how the project satisfies the given requirements:</h3>    
+    <ul>
+        <li>Use of wireless communication: WiFi and Bluetooth A2DP.</li>
+        <li>Use sensors: Rotary encoder, ADC reading of battery voltage, Audio DAC, and USB-PD controller.</li>
+        <li>Actuation: The speaker cone will be moved electronically.</li>
+        <li>Uplink and downlink communication: The backend will be used to both monitoring and control.</li>
+        <li>Backend/visualization: Yes</li>
+    </ul>
+    <p>
+        A minimum hardware prototype can be built on a breadboard using the given ESP32 devkit module in
+        combination with a PCM5102 audio DAC development module. This will allow software development to
+        begin in parallel with hardware development. LED’s, encoders, amplifier modules, batteries etc. can be
+        added to the breadboard if needed.
+    </p>
 </body>
 </html>
 
