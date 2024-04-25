@@ -6,8 +6,8 @@ const urlPlaying = [
     {
         url: "",
         name: "",
-        isPlaying: true,
-        volume: 50        
+        isPlaying: "false",
+        volume: "50"        
     }
 ];
 
