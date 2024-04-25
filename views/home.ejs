@@ -74,7 +74,7 @@
             document.getElementById('message').textContent = 'URL has been submitted.';
 
 
-            // Fetch the currently playing song
+            // Fetch the currently playing Radio
             fetch('/radio/play')
                 .then(response => response.json())
                 .then(data => {
@@ -94,7 +94,12 @@
         })
         .catch(error => {
             console.error('Error:', error);
+            isPlaying = false;
+            localStorage.setItem('isPlaying', isPlaying);
+            document.getElementById('playPauseButton').textContent = 'Play';
             document.getElementById('message').textContent = 'An error occurred while submitting the URL.';
+            // Clear the name of the previous radio station
+            document.getElementById('currentSong').textContent = '';
         });
     });
 
