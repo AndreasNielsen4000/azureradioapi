@@ -19,18 +19,22 @@
         <br>
         <br>
         <label for="volume">Volume:</label>
-        <input type="range" id="volume" name="volume" min="0" max="100" value="50">
+        <input type="range" id="volume" name="volume" min="0" max="127" value="20">
+        <br>
+        <p>Current Volume: <span id="currentVolume"></span></p>
         <br>
         <button type="button" id="playPauseButton">Play/Pause</button>
     </form>
     <p id="message"></p>
+    
 </body>
 </html>
 
 <script>
     // When the page loads, restore the state from localStorage
     let isPlaying = localStorage.getItem('isPlaying') === 'true';
-    
+    let volume = localStorage.getItem('volume') || 20; // Default volume is 20 if not set in localStorage
+
     window.addEventListener('load', function() {
         const url = localStorage.getItem('url');
         const volume = localStorage.getItem('volume');
@@ -46,6 +50,7 @@
         }
         if (volume) {
             document.getElementById('volume').value = volume;
+            document.getElementById('currentVolume').textContent = volume;
         }
         if (name) {
             document.getElementById('name').value = name;
@@ -78,6 +83,7 @@
             fetch('/radio/play')
                 .then(response => response.json())
                 .then(data => {
+                    const currentVolume = document.getElementById('currentVolume');
                     const currentSongElement = document.getElementById('currentSong');
                     if (data[0].url) {
                         currentSongElement.textContent = data[0].name;
@@ -85,6 +91,10 @@
                         currentSongElement.previousElementSibling.style.display = 'block'; // Show "Currently Playing:"
                     } else {
                         currentSongElement.previousElementSibling.style.display = 'none'; // Hide "Currently Playing:"
+                    }
+                    if (data[0].deviceVolume) {
+                        currentVolume.textContent = data[0].deviceVolume;
+                        localStorage.setItem('volume', data[0].deviceVolume);
                     }
                 })
                 .catch(error => {
