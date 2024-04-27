@@ -7,13 +7,9 @@ const urlPlaying = [
         url: "",
         name: "",
         isPlaying: "false",
-        volume: "50"        
-    }
-];
-
-const batteryLevel = [
-    {
-        level: "100"
+        volume: "20",
+        batterylevel : "",
+        deviceMode : "",        
     }
 ];
 
@@ -54,30 +50,6 @@ router.get('/api', (request, response) => {
 // Home page route
 router.get('/home', (request, response) => {
     response.render("home");
-});
-
-// Get battery level from the device - /radio/battery
-router.get('/radio/battery', async (request, response) => {
-    try {
-        response.send(batteryLevel);
-        console.log('Battery level:', batteryLevel);
-    } catch (error) {
-        console.error(error);
-        response.status(500).send('An error occurred while fetching battery level.');
-    }
-});
-
-// Post battery level to the device - /radio/battery
-router.post('/radio/battery', async (request, response) => {
-    try {
-        if (request.body.level !== undefined) {
-            batteryLevel[0].level = request.body.level;
-        }
-        response.send(batteryLevel);
-    } catch (error) {
-        console.error(error);
-        response.status(500).send('An error occurred while posting battery level.');
-    }
 });
 
 // Get radio stations by name
@@ -145,10 +117,17 @@ router.post('/radio/play', async (request, response) => {
                     searchterm: request.body.url,
                     limit: 1
                 }
-                console.log('Filter:', filter);
-                const stations = await RadioBrowser.getStations(filter);
-                console.log('Stations:', stations);
-                urlPlaying[0].name = stations[0].name;
+                try {
+                    const stations = await RadioBrowser.getStations(filter);
+                    if (stations.length > 0) {
+                        urlPlaying[0].name = stations[0].name;
+                    } else {
+                        urlPlaying[0].name = "";
+                    }
+                } catch (error) {
+                    console.error('Error fetching stations:', error);
+                    urlPlaying[0].name = "";
+                }
             }
         }
         if (request.body.name !== undefined) {
@@ -160,6 +139,13 @@ router.post('/radio/play', async (request, response) => {
         if (request.body.volume !== undefined) {
             urlPlaying[0].volume = request.body.volume;
         }
+        if (request.body.batterylevel !== undefined) {
+            urlPlaying[0].batterylevel = request.body.batterylevel;
+        }
+        if (request.body.deviceMode !== undefined) {
+            urlPlaying[0].deviceMode = request.body.deviceMode;
+        }
+        console.log(urlPlaying);
         response.send(urlPlaying);
     } catch (error) {
         console.error(error);
