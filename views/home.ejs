@@ -8,7 +8,7 @@
     <h1>Welcome to the Radio Player Home</h1>
     <p>This is a simple radio player that can play audio from a URL.</p>
 
-    <h2>Currently Playing:</h2>
+    <h2 id="currentlyPlayingText">Currently Playing:</h2>
     <h3 id="currentSong"></h3>
 
     <h2>Enter a URL to play:</h2>
@@ -21,7 +21,19 @@
         <label for="volume">Volume:</label>
         <input type="range" id="volume" name="volume" min="0" max="127" value="20">
         <br>
-        <p>Current Volume: <span id="currentVolume"></span></p>
+        <p>Current Device Volume: <span id="currentVolume"></span></p>
+        <br>
+        <p>Battery Level: <span id="batteryLevel"></span></p>
+        <br>
+        <p>Current Device Mode: <span id="currentDeviceMode"></span></p>
+        <br>
+        <!-- Add a dropdown menu for the device mode -->
+        <label for="deviceMode">Device Mode:</label>
+        <select id="deviceMode">
+            <option value="WiFi">WiFi</option>
+            <option value="Bluetooth">Bluetooth</option>
+            <option value="Charge">Charge</option>
+        </select>
         <br>
         <button type="button" id="playPauseButton">Play/Pause</button>
     </form>
@@ -32,13 +44,15 @@
 
 <script>
     // When the page loads, restore the state from localStorage
-    let isPlaying = localStorage.getItem('isPlaying') === 'true';
-    let volume = localStorage.getItem('volume') || 20; // Default volume is 20 if not set in localStorage
-
     window.addEventListener('load', function() {
         const url = localStorage.getItem('url');
-        const volume = localStorage.getItem('volume');
         const name = localStorage.getItem('name');
+        let isPlaying = localStorage.getItem('isPlaying') === 'true';
+        let volume = localStorage.getItem('volume') || 20; // Default volume is 20 if not set in localStorage¨'
+        let currentVolume = localStorage.getItem('currentVolume') || 20;
+        let batteryLevel = localStorage.getItem('batteryLevel') || 100;
+        let deviceMode = localStorage.getItem('deviceMode') || 'None';
+        let deviceDeviceMode = localStorage.getItem('deviceDeviceMode') || 'None';
 
         if (url) {
             document.getElementById('url').value = url;
@@ -46,14 +60,25 @@
         if (isPlaying) {
             document.getElementById('playPauseButton').textContent = 'Pause';
         } else {
-        document.getElementById('playPauseButton').textContent = 'Play';
+            document.getElementById('playPauseButton').textContent = 'Play';
         }
         if (volume) {
             document.getElementById('volume').value = volume;
-            document.getElementById('currentVolume').textContent = volume;
         }
         if (name) {
             document.getElementById('name').value = name;
+        }
+        if (currentVolume) {
+            document.getElementById('currentVolume').textContent = currentVolume;
+        }
+        if (batteryLevel) {
+            document.getElementById('batteryLevel').textContent = batteryLevel;
+        }
+        if (deviceMode) {
+            document.getElementById('deviceMode').value = deviceMode;
+        }
+        if (deviceDeviceMode) {
+            document.getElementById('deviceDeviceMode').textContent = deviceDeviceMode;
         }
     });
     document.getElementById('playForm').addEventListener('submit', function(event) {
@@ -77,6 +102,9 @@
         .then(response => response.json())
         .then(data => {
             document.getElementById('message').textContent = 'URL has been submitted.';
+            setTimeout(function() {
+                document.getElementById('message').textContent = '';
+            }, 3000);
 
 
             // Fetch the currently playing Radio
@@ -85,11 +113,13 @@
                 .then(data => {
                     const currentVolume = document.getElementById('currentVolume');
                     const currentSongElement = document.getElementById('currentSong');
-                    if (data[0].url) {
+                    const currentlyPlayingText = document.getElementById('currentlyPlayingText');
+                    if (data[0].name !== "") {
                         currentSongElement.textContent = data[0].name;
                         localStorage.setItem('name', data[0].name);
                         currentSongElement.previousElementSibling.style.display = 'block'; // Show "Currently Playing:"
                     } else {
+                        currentSongElement.textContent = '';
                         currentSongElement.previousElementSibling.style.display = 'none'; // Hide "Currently Playing:"
                     }
                     if (data[0].deviceVolume) {
@@ -99,7 +129,7 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    document.getElementById('currentSong').textContent = 'Error fetching current song.';
+                    document.getElementById('currentSong').textContent = 'Error fetching current Radio station.';
                 });
         })
         .catch(error => {
@@ -112,25 +142,6 @@
             document.getElementById('currentSong').textContent = '';
         });
     });
-
-
-    // Fetch the currently playing Radio
-    fetch('/radio/play')
-        .then(response => response.json())
-        .then(data => {
-            const currentSongElement = document.getElementById('currentSong');
-            if (data[0].url) {
-                currentSongElement.textContent = data[0].name;
-                localStorage.setItem('name', data[0].name);
-                currentSongElement.previousElementSibling.style.display = 'block'; // Show "Currently Playing:"
-            } else {
-                currentSongElement.previousElementSibling.style.display = 'none'; // Hide "Currently Playing:"
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            document.getElementById('currentSong').textContent = 'Error fetching current song.';
-        });
 
     // Adjust the volume
     document.getElementById('volume').addEventListener('change', function() {
@@ -175,6 +186,82 @@
             document.getElementById('message').textContent = 'An error occurred while toggling play/pause.';
         });
     });
+
+    // When the user selects a mode, send a POST request to the server with the selected mode
+    document.getElementById('deviceMode').addEventListener('change', function() {
+        const deviceMode = this.value;
+        localStorage.setItem('deviceMode', deviceMode);
+
+        fetch('/radio/play', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `deviceMode=${encodeURIComponent(deviceMode)}`,
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('message').textContent = 'An error occurred while changing the device mode.';
+        });
+    });
+
+// Rest of your code...
+    
+    // Update web page with newest values:
+    setInterval(() => {
+        fetch('/radio/play')
+            .then(response => response.json())
+            .then(data => {
+                const currentVolume = document.getElementById('currentVolume');
+                const currentSongElement = document.getElementById('currentSong');
+                const currentlyPlayingText = document.getElementById('currentlyPlayingText'); // Get the h2 tag
+                const playPauseButton = document.getElementById('playPauseButton');
+                const batteryLevel = document.getElementById('batteryLevel');
+                const deviceMode = document.getElementById('deviceMode');
+                const currentDeviceMode = document.getElementById('currentDeviceMode');
+                if (data[0].name !== "") {
+                    currentSongElement.textContent = data[0].name;
+                    localStorage.setItem('name', data[0].name);
+                    currentSongElement.previousElementSibling.style.display = 'block'; // Show "Currently Playing:"
+                } else {
+                    currentSongElement.textContent = '';
+                    currentSongElement.previousElementSibling.style.display = 'none'; // Hide "Currently Playing:"
+                }
+                if (data[0].deviceVolume !== "") {
+                    currentVolume.textContent = data[0].deviceVolume;
+                    localStorage.setItem('currentVolume', data[0].deviceVolume);
+                } else {
+                    currentVolume.textContent = 'Unable to get volume from device.';
+                }
+                if (data[0].isPlaying === 'true') {
+                    playPauseButton.textContent = 'Pause';
+                } else {
+                    playPauseButton.textContent = 'Play';
+                }
+                if (data[0].batteryLevel !== "") {
+                    batteryLevel.textContent = data[0].batteryLevel;
+                    localStorage.setItem('batteryLevel', data[0].batteryLevel);
+                } else {
+                    batteryLevel.textContent = 'Unable to get battery level from device.';
+                }
+                if (data[0].deviceMode !== "") {
+                    deviceMode.value = data[0].deviceMode;
+                    localStorage.setItem('deviceMode', data[0].deviceMode);
+                } else {
+                    deviceMode.value = 'None';
+                }
+                if (data[0].deviceDeviceMode !== "") {
+                    currentDeviceMode.textContent = data[0].deviceDeviceMode;
+                    localStorage.setItem('deviceDeviceMode', data[0].deviceDeviceMode);
+                } else {
+                    currentDeviceMode.textContent = 'Unable to get device mode from device.';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('message').textContent = 'An error occurred while updating the page.';
+            });
+    }, 1000);
 </script>
 
 <%- include ('_footer'); -%>

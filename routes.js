@@ -10,8 +10,7 @@ const urlPlaying = [
         deviceisPlaying: "",
         volume: "20",
         deviceVolume : "",
-        batterylevel : "",
-        deviceBatteryLevel : "",
+        batteryLevel : "",
         deviceMode : "",
         deviceDeviceMode : "",        
     }
@@ -149,14 +148,11 @@ router.post('/radio/play', async (request, response) => {
         if (request.body.deviceVolume !== undefined) {
             urlPlaying[0].deviceVolume = request.body.deviceVolume;
         }
-        if (request.body.batterylevel !== undefined) {
-            urlPlaying[0].batterylevel = request.body.batterylevel;
+        if (request.body.batteryLevel !== undefined) {
+            urlPlaying[0].batteryLevel = request.body.batteryLevel;
         }
         if (request.body.deviceMode !== undefined) {
             urlPlaying[0].deviceMode = request.body.deviceMode;
-        }
-        if (request.body.deviceBatteryLevel !== undefined) {
-            urlPlaying[0].deviceBatteryLevel = request.body.deviceBatteryLevel;
         }
         if (request.body.deviceDeviceMode !== undefined) {
             urlPlaying[0].deviceDeviceMode = request.body.deviceDeviceMode;
