@@ -14,30 +14,33 @@
     <h2>Enter a URL to play:</h2>
     <form id="playForm">
         <input type="text" name="url" id="url" placeholder="Enter URL" required> 
-        <button type="submit">Play</button> 
-        <br>
-        <br>
-        <br>
-        <label for="volume">Volume:</label>
-        <input type="range" id="volume" name="volume" min="0" max="127" value="20">
-        <br>
-        <p>Current Device Volume: <span id="currentVolume"></span></p>
-        <br>
-        <p>Battery Level: <span id="batteryLevel"></span></p>
-        <br>
-        <p>Current Device Mode: <span id="currentDeviceMode"></span></p>
-        <br>
-        <!-- Add a dropdown menu for the device mode -->
-        <label for="deviceMode">Device Mode:</label>
-        <select id="deviceMode">
-            <option value="WiFi">WiFi</option>
-            <option value="Bluetooth">Bluetooth</option>
-            <option value="Charge">Charge</option>
-        </select>
-        <br>
-        <button type="button" id="playPauseButton">Play/Pause</button>
+        <button type="submit">Submit</button> 
     </form>
     <p id="message"></p>
+    <br>
+    <p id="wifiMessage" style="display: none;">Please turn on WiFi to submit URLs.</p>
+    <br>
+    <br>
+    <label for="volume">Volume:</label>
+    <input type="range" id="volume" name="volume" min="0" max="127" value="20">
+    <br>
+    <p>Current Device Volume: <span id="currentVolume"></span></p>
+    <br>
+    <p>Battery Level: <span id="batteryLevel"></span></p>
+    <br>
+    <p>Current Device Mode: <span id="currentDeviceMode"></span></p>
+    <br>
+    <!-- Add a dropdown menu for the device mode -->
+    <label for="deviceMode">Device Mode:</label>
+    <select id="deviceMode">
+        <option value="WiFi">WiFi</option>
+        <option value="Bluetooth">Bluetooth</option>
+        <option value="Charge">Charge</option>
+        <option value="Standby">Standby</option>
+    </select>
+    <br>
+    <button type="button" id="playPauseButton">Play/Pause</button>
+    
     
 </body>
 </html>
@@ -49,10 +52,10 @@
         const name = localStorage.getItem('name');
         let isPlaying = localStorage.getItem('isPlaying') === 'true';
         let volume = localStorage.getItem('volume') || 20; // Default volume is 20 if not set in localStorage¨'
-        let currentVolume = localStorage.getItem('currentVolume') || 20;
-        let batteryLevel = localStorage.getItem('batteryLevel') || 100;
-        let deviceMode = localStorage.getItem('deviceMode') || 'None';
-        let deviceDeviceMode = localStorage.getItem('deviceDeviceMode') || 'None';
+        let currentVolume = localStorage.getItem('currentVolume');
+        let batteryLevel = localStorage.getItem('batteryLevel');
+        let deviceMode = localStorage.getItem('deviceMode');
+        let deviceDeviceMode = localStorage.getItem('deviceDeviceMode');
 
         if (url) {
             document.getElementById('url').value = url;
@@ -165,6 +168,7 @@
     // Play/Pause button
     document.getElementById('playPauseButton').addEventListener('click', function() {
         // Toggle play state
+        let isPlaying = localStorage.getItem('isPlaying') === 'true';
         isPlaying = !isPlaying;
         localStorage.setItem('isPlaying', isPlaying);
 
@@ -205,7 +209,6 @@
         });
     });
 
-// Rest of your code...
     
     // Update web page with newest values:
     setInterval(() => {
@@ -219,6 +222,8 @@
                 const batteryLevel = document.getElementById('batteryLevel');
                 const deviceMode = document.getElementById('deviceMode');
                 const currentDeviceMode = document.getElementById('currentDeviceMode');
+                const urlInput = document.getElementById('url');
+                const playButton = document.querySelector('#playForm button[type="submit"]');
                 if (data[0].name !== "") {
                     currentSongElement.textContent = data[0].name;
                     localStorage.setItem('name', data[0].name);
@@ -255,6 +260,18 @@
                     localStorage.setItem('deviceDeviceMode', data[0].deviceDeviceMode);
                 } else {
                     currentDeviceMode.textContent = 'Unable to get device mode from device.';
+                }
+                if (currentDeviceMode.textContent !== 'WiFi') {
+                    urlInput.disabled = true;
+                    playButton.disabled = true;
+                    document.getElementById('wifiMessage').style.display = 'block';
+                    currentSongElement.previousElementSibling.style.display = 'none'; // Hide "Currently Playing:"
+                    currentSongElement.textContent = '';
+                } else {
+                    urlInput.disabled = false;
+                    playButton.disabled = false;
+                    document.getElementById('wifiMessage').style.display = 'none';
+                    currentSongElement.previousElementSibling.style.display = 'block'; // Show "Currently Playing:"
                 }
             })
             .catch(error => {
