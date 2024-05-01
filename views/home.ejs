@@ -224,6 +224,32 @@
                 const currentDeviceMode = document.getElementById('currentDeviceMode');
                 const urlInput = document.getElementById('url');
                 const playButton = document.querySelector('#playForm button[type="submit"]');
+                if (data[0].deviceDeviceMode !== 'WiFi') {
+                    urlInput.disabled = true;
+                    playButton.disabled = true;
+                    document.getElementById('wifiMessage').style.display = 'block';
+                    currentSongElement.previousElementSibling.style.display = 'none'; // Hide "Currently Playing:"
+                    currentSongElement.textContent = '';
+                    localStorage.setItem('name', '');
+                    data[0].name = '';
+                    // Set the name to an empty string
+                    fetch('/radio/play', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: `name=${encodeURIComponent('')}`,
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.getElementById('message').textContent = 'An error occurred while setting the name to an empty string.';
+                    });
+                } else {
+                    urlInput.disabled = false;
+                    playButton.disabled = false;
+                    document.getElementById('wifiMessage').style.display = 'none';
+                    currentSongElement.previousElementSibling.style.display = 'block'; // Show "Currently Playing:"
+                }
                 if (data[0].name !== "") {
                     currentSongElement.textContent = data[0].name;
                     localStorage.setItem('name', data[0].name);
@@ -260,18 +286,6 @@
                     localStorage.setItem('deviceDeviceMode', data[0].deviceDeviceMode);
                 } else {
                     currentDeviceMode.textContent = 'Unable to get device mode from device.';
-                }
-                if (currentDeviceMode.textContent !== 'WiFi') {
-                    urlInput.disabled = true;
-                    playButton.disabled = true;
-                    document.getElementById('wifiMessage').style.display = 'block';
-                    currentSongElement.previousElementSibling.style.display = 'none'; // Hide "Currently Playing:"
-                    currentSongElement.textContent = '';
-                } else {
-                    urlInput.disabled = false;
-                    playButton.disabled = false;
-                    document.getElementById('wifiMessage').style.display = 'none';
-                    currentSongElement.previousElementSibling.style.display = 'block'; // Show "Currently Playing:"
                 }
             })
             .catch(error => {
