@@ -1,8 +1,15 @@
+/*
+    This file contains the routes for the application. 
+    It defines the routes for the home page, about page, API page, and radio stations.
+    It also contains the routes for getting users, top radio stations, and playing a radio station.
+    This is where we have designed the API endpoints for the application, which is used to interact with the frontend and app. 
+*/
 const express = require('express');
 const router = express.Router();
 const RadioBrowser = require('radio-browser');
 
-const urlPlaying = [
+// Backend database to store the information from speaker device and what is playing
+const backendDataBase = [
     {
         url: "",
         name: "",
@@ -16,6 +23,7 @@ const urlPlaying = [
     }
 ];
 
+// Test database for initial testing, not used
 const users = [
     {
       id: 1,
@@ -109,11 +117,11 @@ router.get('/radio/top/dk', async (request, response) => {
     }
 });
 
-// Post radio station URL
+// Post new information to backend database
 router.post('/radio/play', async (request, response) => {
     try {
         if (request.body.url !== undefined) {
-            urlPlaying[0].url = request.body.url;
+            backendDataBase[0].url = request.body.url;
             if (request.body.name === undefined) {
                 let filter = {
                     by: 'url', // stations by url
@@ -123,52 +131,52 @@ router.post('/radio/play', async (request, response) => {
                 try {
                     const stations = await RadioBrowser.getStations(filter);
                     if (stations.length > 0) {
-                        urlPlaying[0].name = stations[0].name;
+                        backendDataBase[0].name = stations[0].name;
                     } else {
-                        urlPlaying[0].name = "";
+                        backendDataBase[0].name = "";
                     }
                 } catch (error) {
                     console.error('Error fetching stations:', error);
-                    urlPlaying[0].name = "";
+                    backendDataBase[0].name = "";
                 }
             }
         }
         if (request.body.name !== undefined) {
-            urlPlaying[0].name = request.body.name;
+            backendDataBase[0].name = request.body.name;
         }
         if (request.body.isPlaying !== undefined) {
-            urlPlaying[0].isPlaying = request.body.isPlaying;
+            backendDataBase[0].isPlaying = request.body.isPlaying;
         }
         if (request.body.deviceisPlaying !== undefined) {
-            urlPlaying[0].deviceisPlaying = request.body.deviceisPlaying;
+            backendDataBase[0].deviceisPlaying = request.body.deviceisPlaying;
         }
         if (request.body.volume !== undefined) {
-            urlPlaying[0].volume = request.body.volume;
+            backendDataBase[0].volume = request.body.volume;
         }
         if (request.body.deviceVolume !== undefined) {
-            urlPlaying[0].deviceVolume = request.body.deviceVolume;
+            backendDataBase[0].deviceVolume = request.body.deviceVolume;
         }
         if (request.body.batteryLevel !== undefined) {
-            urlPlaying[0].batteryLevel = request.body.batteryLevel;
+            backendDataBase[0].batteryLevel = request.body.batteryLevel;
         }
         if (request.body.deviceMode !== undefined) {
-            urlPlaying[0].deviceMode = request.body.deviceMode;
+            backendDataBase[0].deviceMode = request.body.deviceMode;
         }
         if (request.body.deviceDeviceMode !== undefined) {
-            urlPlaying[0].deviceDeviceMode = request.body.deviceDeviceMode;
+            backendDataBase[0].deviceDeviceMode = request.body.deviceDeviceMode;
         }
-        console.log(urlPlaying);
-        response.send(urlPlaying);
+        console.log(backendDataBase);
+        response.send(backendDataBase);
     } catch (error) {
         console.error(error);
         response.status(500).send('An error occurred while posting playing radio station.');
     }
 });
 
-// Get radio station URL
+// Get the information from backend database
 router.get('/radio/play', async (request, response) => {
     try {
-        response.send(urlPlaying);
+        response.send(backendDataBase);
     } catch (error) {
         console.error(error);
         response.status(500).send('An error occurred while fetching playing radio station.');

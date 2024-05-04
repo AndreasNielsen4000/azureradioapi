@@ -46,6 +46,16 @@
 </html>
 
 <script>
+    /*
+    This script handles the functionality of the radio player. It does the following:
+
+    1. Restores the state from localStorage when the page loads.
+    2. Submits the URL entered by the user to the server and updates the play state.
+    3. Adjusts the volume based on the user's input.
+    4. Toggles the play/pause state when the Play/Pause button is clicked.
+    5. Sends a POST request to the server with the selected device mode when the user selects a mode.
+    6. Updates the web page with the newest values from the server every second.
+    */
     // When the page loads, restore the state from localStorage
     window.addEventListener('load', function() {
         const url = localStorage.getItem('url');
